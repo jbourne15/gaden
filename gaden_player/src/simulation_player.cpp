@@ -79,9 +79,9 @@ int main( int argc, char** argv )
     mkr_gas_points.action = visualization_msgs::Marker::ADD;
     mkr_gas_points.type = visualization_msgs::Marker::POINTS;   //Marker type
     mkr_gas_points.id = 0;                                      //One marker with multiple points.
-    mkr_gas_points.scale.x = 0.025;
-    mkr_gas_points.scale.y = 0.025;
-    mkr_gas_points.scale.z = 0.025;
+    mkr_gas_points.scale.x = 0.25;
+    mkr_gas_points.scale.y = 0.25;
+    mkr_gas_points.scale.z = 0.25;
     mkr_gas_points.pose.orientation.w = 1.0;
 
 

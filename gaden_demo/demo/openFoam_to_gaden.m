@@ -39,14 +39,25 @@ clc;
 % Global volume of the environment (Bounding Box)
 % refer to original CAD model used for CFD simulation
 % This model only accounts for the inner volume (no walls neither obstacles)
-min_range = [-5 -5.5 0];    %m (x,y,z)
-max_range = [5 5.5 3];      %m (x,y,z)
-plot_data = true;
-z_layer_to_plot = 15;       %if plot_data=true, the cell_z to plot 2D slices
 
-% Generate a 3Dgrid with cube cells
-cell_resolution = 0.1;      %(m/cell) cell size of desired cube_cells
+% refer to Cartesian BOX in SIMSCALE
+min_range = [-25 -25   0];    %m (x,y,z)
+max_range = [25 25 5];      %m (x,y,z)
+plot_data = true;
+z_layer_to_plot = 2;       %if plot_data=true, the cell_z to plot 2D slices
+
+% Generate a z_layer_for_occ3Dgrid with cube cells
+cell_resolution = 0.5;      %(m/cell) cell size of desired cube_cells
 folder_path = './';         %Path to the folder containing the CFD wind_flow simulations (for this demo is the current folder)
+
+% min_range = [-5 -5.5 0];    %m (x,y,z)
+% max_range = [5 5.5 3];      %m (x,y,z)
+% plot_data = true;
+% z_layer_to_plot = 30;       %if plot_data=true, the cell_z to plot 2D slices
+% 
+% % Generate a 3Dgrid with cube cells
+% cell_resolution = 0.1;      %(m/cell) cell size of desired cube_cells
+% folder_path = './';         %Path to the folder containing the CFD wind_flow simulations (for this demo is the current folder)
 
 %==========================================================================
 
@@ -66,8 +77,8 @@ num_cells_z = ceil(environment_dimensions(3)/cell_resolution);
 % Since the shape of these cells is not constant, we apply a PraView filter to obtain 
 % the cell centers, and then export the data to a CSV file (input for this script)
 % FORMAT: "U [m/s]:0","U [m/s]:1","U [m/s]:2","Points:0","Points:1","Points:2"
-% FORMAT: U, V, W, x, y, z
-filename = strcat(folder_path,'wind_at_cell_center_points.csv');
+% FORMAT: U, V, W, x, y, z                               
+filename = strcat(folder_path,'wind_at_cell_center_points0.csv');
 CSV = dlmread(filename,',',1,0);
 
 % Plot original data in 3D - scatter3(x,y,z,size,[color])
