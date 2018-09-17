@@ -16,17 +16,25 @@ int main( int argc, char** argv )
     ros::init(argc, argv, NODE_NAME);
 	ros::NodeHandle n;
     ros::NodeHandle pn("~");
+    
+    lastTime = ros::Time::now();
 
     //Read parameters
-    loadNodeParameters(pn);
-	
+    loadNodeParameters(pn,n);
+    newGPSData = false;
+
     //Publishers
     ros::Publisher sensor_read_pub = n.advertise<olfaction_msgs::gas_sensor>("Sensor_reading", 500);
-	ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("Sensor_display", 100);
+    ros::Publisher sensor_read_pub_mps = n.advertise<mps_driver::MPS>(agentName+"/"+topicName, 1);
+    ros::Publisher agentSensor_read_pub_mps = n.advertise<enif_iuc::AgentMPS>("/agent_"+topicName, 1);
+    ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("Sensor_display", 100);
+
+    ros::Subscriber gps_sub = n.subscribe(agentName+"/mavros/global_position/global",1, &gpsCallback);
+    ros::Subscriber local_sub = n.subscribe(agentName+"/gps_pose", 1, &localCallback); // from geodetic
 	
     //Service to request gas concentration
     ros::ServiceClient client = n.serviceClient<gaden_player::GasPosition>("/odor_value");
-	
+
 
     //Init Visualization data (marker)
     //---------------------------------
@@ -108,6 +116,10 @@ int main( int argc, char** argv )
 
                 //Simulate Gas_Sensor response given this GT values of the concentration!
                 olfaction_msgs::gas_sensor sensor_msg;
+		
+		mps_driver::MPS sensor_msg_mps;
+		enif_iuc::AgentMPS agentSensor_msg_mps;
+		
                 sensor_msg.header.frame_id = input_sensor_frame;
                 sensor_msg.header.stamp = ros::Time::now();
                 switch (input_sensor_model)
@@ -180,7 +192,33 @@ int main( int argc, char** argv )
 
 
                 //Publish simulated sensor reading
-                sensor_read_pub.publish(sensor_msg);
+                sensor_read_pub.publish(sensor_msg); // olfaction_msg
+
+		//mps
+		if (newGPSData){
+		  sensor_msg_mps.gasID = input_sensor_frame;
+		  sensor_msg_mps.percentLEL = sensor_msg.raw;
+
+		  sensor_msg_mps.GPS_latitude = gps.latitude;
+		  sensor_msg_mps.GPS_longitude = gps.longitude;
+		  sensor_msg_mps.GPS_altitude = gps.altitude; // sim
+
+		  sensor_msg_mps.local_x = xt[0];
+		  sensor_msg_mps.local_y = xt[1];
+		  sensor_msg_mps.local_z = xt[2];
+
+		  //enif_iuc
+		  agentSensor_msg_mps.agent_number = AGENT_NUMBER;
+		  agentSensor_msg_mps.mps=sensor_msg_mps;
+
+		  sensor_read_pub_mps.publish(sensor_msg_mps);	       
+		  if (ros::Time::now()-lastTime > ros::Duration(XbeeRate) && simXbee){
+		    agentSensor_read_pub_mps.publish(agentSensor_msg_mps);
+		    lastTime = ros::Time::now();
+		  }
+		}
+
+		
                 notified = false;
             }
             else
@@ -344,8 +382,22 @@ float simulate_pid(gaden_player::GasPositionResponse GT_gas_concentrations)
 }
 
 
+void localCallback(const geometry_msgs::PoseWithCovarianceStamped &msg){
+  //from geodetic_util node which takes in gps data and converts to ENU pose msg
+  xt[0] = msg.pose.pose.position.x;
+  xt[1] = msg.pose.pose.position.y;
+  xt[2] = msg.pose.pose.position.z;
+  //from ENU to local pose
+}
+
+void gpsCallback(const sensor_msgs::NavSatFix &msg){  
+  gps = msg;
+  newGPSData = true;
+}
+
+
 //Load Sensor parameters
-void loadNodeParameters(ros::NodeHandle private_nh)
+void loadNodeParameters(ros::NodeHandle private_nh, ros::NodeHandle n)
 {	
     //Sensor Model
     private_nh.param<int>("sensor_model", input_sensor_model, DEFAULT_SENSOR_MODEL);
@@ -359,8 +411,13 @@ void loadNodeParameters(ros::NodeHandle private_nh)
     //PID_correction_factors
     private_nh.param<bool>("use_PID_correction_factors", use_PID_correction_factors, false);
 
+    private_nh.getParam("topicName", topicName);
+    private_nh.getParam("xbeeRate", XbeeRate);
+    private_nh.getParam("simXbee",simXbee);
+    private_nh.getParam("AGENT_NUMBER", AGENT_NUMBER);
 
-
+    agentName = ros::this_node::getNamespace();  
+    agentName.erase(0,1);
 
     ROS_INFO("The data provided in the roslaunch file is:");
 	ROS_INFO("Sensor model: %d",input_sensor_model);

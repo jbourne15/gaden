@@ -73,7 +73,7 @@ int main( int argc, char** argv )
     srand(time(NULL));// initialize random seed
 
     //Init Markers for RVIZ visualization
-    mkr_gas_points.header.frame_id = "/map";
+    mkr_gas_points.header.frame_id = "/world";
     mkr_gas_points.header.stamp = ros::Time::now();
     mkr_gas_points.ns = "Gas_Dispersion";
     mkr_gas_points.action = visualization_msgs::Marker::ADD;

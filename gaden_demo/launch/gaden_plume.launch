@@ -1,0 +1,21 @@
+<!-- DEMO mission file for GADEN PLAYER in a 3D environment-->
+
+<launch>
+    <!-- arg name="FixedFrame" default="/map" / -->
+    <arg name="log" default="log" />
+
+    ### NODE PLAYER ###
+    #-------------------
+    <node pkg="gaden_player" type="gaden_player" name="gaden_player" output="$(arg log)" respawn="true">
+        <param name="/verbose" value="false" />
+	<param name="/player_freq" value="1" />        ###(Hz) Freq for loading the simulation log_files	    	    
+	<param name="/num_simulators" value="1" />      ### Number of simulations to load [1-inf] (useful for multiple sources and gases)
+    
+        # Data from the "filament_simulator" pkg
+        # Multiple sources can be set here
+        <param name="/simulation_data_0" value="$(find gaden_demo)/demo/logs_gas_dipersion_simulator/FilamentSimulation_gasType_0_sourcePosition_2.50_-20.00_2.50_iteration_" />
+    </node>
+   
+</launch>
+
+

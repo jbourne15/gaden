@@ -6,6 +6,11 @@
 #include <tf/transform_listener.h>
 #include <olfaction_msgs/gas_sensor.h>
 #include <gaden_player/GasPosition.h>
+#include "mps_driver/MPS.h"
+#include "enif_iuc/AgentMPS.h"
+//#include <dlib/matrix.h>
+#include "sensor_msgs/NavSatFix.h"
+#include "geometry_msgs/PoseWithCovarianceStamped.h"
 
 #include <cstdlib>
 #include <math.h>
@@ -39,14 +44,22 @@
 #define		DEFAULT_SENSOR_NAME					"mox_sensor"
 #define		DEFAULT_SENSOR_MODEL				TGS2620_ID				
 #define		DEFAULT_SENSOR_FRAME				"mox_frame"
-#define		DEFAULT_FIXED_FRAME					"map"
+#define		DEFAULT_FIXED_FRAME					"world"
 
+int AGENT_NUMBER;
 	
 // Sensor Parameters
 int				input_sensor_model;
 std::string		input_sensor_frame;
 std::string		input_fixed_frame;
+std::string		topicName;
+std::string		agentName;
+float XbeeRate;
+bool simXbee, newGPSData;
 bool            use_PID_correction_factors;
+sensor_msgs::NavSatFix gps;
+ros::Time lastTime;
+std::vector<double> xt(3,0);
 
 //MOX model params
 bool first_reading;                 //First reading is set to baseline always
@@ -61,10 +74,12 @@ int ch_id;                          //Chemical ID
 
 
 //functions:
-void  loadNodeParameters(ros::NodeHandle private_nh);
+void  loadNodeParameters(ros::NodeHandle private_nh, ros::NodeHandle n);
 float simulate_mox_as_line_loglog(gaden_player::GasPositionResponse GT_gas_concentrations);
 float simulate_pid(gaden_player::GasPositionResponse GT_gas_concentrations);
 
+void localCallback(const geometry_msgs::PoseWithCovarianceStamped &msg);
+void gpsCallback(const sensor_msgs::NavSatFix &msg);
 
 
 //------------------------ SENSOR CHARACTERIZATION PARAMS ----------------------------------//

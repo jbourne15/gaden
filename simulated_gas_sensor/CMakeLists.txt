@@ -9,8 +9,12 @@ find_package(catkin REQUIRED COMPONENTS
     visualization_msgs
     std_msgs
     nav_msgs
+    geometry_msgs
+    sensor_msgs
     olfaction_msgs
     tf
+    mps_driver
+    enif_iuc
     pcl_ros)
 
 FILE(GLOB_RECURSE MYFILES_CPP "src/*.cpp")
