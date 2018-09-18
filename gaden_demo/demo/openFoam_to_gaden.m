@@ -41,13 +41,13 @@ clc;
 % This model only accounts for the inner volume (no walls neither obstacles)
 
 % refer to Cartesian BOX in SIMSCALE
-min_range = [-25 -25   0];    %m (x,y,z)
-max_range = [25 25 5];      %m (x,y,z)
+min_range = [-50 -50   0];    %m (x,y,z)
+max_range = [50 50 10];      %m (x,y,z)
 plot_data = true;
-z_layer_to_plot = 2;       %if plot_data=true, the cell_z to plot 2D slices
+z_layer_to_plot = 5;       %if plot_data=true, the cell_z to plot 2D slices
 
 % Generate a z_layer_for_occ3Dgrid with cube cells
-cell_resolution = 0.5;      %(m/cell) cell size of desired cube_cells
+cell_resolution = 1;      %(m/cell) cell size of desired cube_cells
 folder_path = './';         %Path to the folder containing the CFD wind_flow simulations (for this demo is the current folder)
 
 % min_range = [-5 -5.5 0];    %m (x,y,z)
@@ -162,11 +162,10 @@ end;
 
 % ToDo: is it possible to get this information directly from CFD results?
 %Outlet_1: left door ->  20<Xcell<30, 108<Ycell and Zcell<20
-Env(20:30,108:end,1:20) = 2;
+Env(:,1,:) = 2;
 %Outlet_2: right door -> 70<Xcell<80, Ycell>108 and Zcell<20
-Env(70:80,108:end,1:20) = 2;
+% Env(70:80,108:end,1:20) = 2;
     
-
 if plot_data    
     subplot(1,2,2);
     title('New Occupancy map');

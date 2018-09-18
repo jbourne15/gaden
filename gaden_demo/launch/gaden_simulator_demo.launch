@@ -2,7 +2,7 @@
 
 <launch>  
     
-    <arg name="FixedFrame" default="/map" />
+    <arg name="FixedFrame" default="/world" />
     
     ### NODE environment (for RVIZ visualization) ###
     <node pkg="gaden_environment" type="environment" name="environment" output="screen">	    
@@ -39,10 +39,10 @@
 	    <param name="/sim_time" value="300" />                    ### [sec] Total time of the gas dispersion simulation
 	    <param name="/time_step" value="0.25" />                   ### [sec] Time increment between snapshots. Set aprox = cell_size/max_wind_speed.
 	    <param name="/num_filaments_sec" value="50" />            ### Num of filaments released each second	   
-        <param name="/ppm_filament_center" value="10"/>           ### [ppm] Gas concentration at the center of the 3D gaussian (filament)
+        <param name="/ppm_filament_center" value="50"/>           ### [ppm] Gas concentration at the center of the 3D gaussian (filament)
         <param name="/filament_initial_std" value="10"/>          ### [cm] Sigma of the filament at t=0-> 3DGaussian shape
-        <param name="/filament_growth_gamma" value="1"/>         ### [cm²/s] Growth ratio of the filament_std
-        <param name="/filament_noise_std" value="0.15"/>          ### [m] Range of the white noise added on each iteration
+        <param name="/filament_growth_gamma" value="5"/>         ### [cm²/s] Growth ratio of the filament_std
+        <param name="/filament_noise_std" value="0.2"/>          ### [m] Range of the white noise added on each iteration
 	    <param name="/gas_type" value="0" />                      ### 0=Ethanol, 1=Methane, 2=Hydrogen, 6=Acetone
 	    <param name="/temperature" value="298"/>                  ### [Kelvins]
 	    <param name="/pressure" value="1"/>                       ### [Atm]
@@ -56,8 +56,8 @@
 	    <param name="/wind_time_step" value="1" />                ### (sec) time increment between Wind snapshots	    
 	    
 	    # Location of the release point!
-	    <param name="/source_position_x" value="2.5"/>           ### (m)
-	    <param name="/source_position_y" value="-20.0"/>           ### (m)
+	    <param name="/source_position_x" value="25.0"/>           ### (m)
+	    <param name="/source_position_y" value="25.0"/>           ### (m)
 	    <param name="/source_position_z" value="2.5"/>            ### (m)
 	    
 	    <param name="/save_results" value="1" />                  #1=true, 0=false
