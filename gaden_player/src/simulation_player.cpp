@@ -10,38 +10,62 @@
 //--------------- SERVICES CALLBACKS----------------------//
 bool get_gas_value_srv(gaden_player::GasPosition::Request  &req, gaden_player::GasPosition::Response &res)
 {
-    //ROS_INFO("[Player] Request for gas concentration at location [%.2f, %.2f, %.2f]m",req.x, req.y, req.z);
+  // std::cout<<"0"<<std::endl;
+  // ROS_INFO("[Player] %f, %f, %f, %f, %f, %f", player_instances[0].env_min_x, player_instances[0].env_max_x, player_instances[0].env_min_y, player_instances[0].env_max_y, player_instances[0].env_min_z, player_instances[0].env_max_z);
 
+  // ROS_INFO("[Player] %d,%d,%d,%d,%d,%d,", req.x>player_instances[0].env_min_x, req.y>player_instances[0].env_min_y, req.z>player_instances[0].env_min_z, req.x<player_instances[0].env_max_x, req.y<player_instances[0].env_max_y, req.z<player_instances[0].env_max_z);
+  
+  
+  if (req.z>player_instances[0].env_min_z && req.x>player_instances[0].env_min_x && req.y>player_instances[0].env_min_y && req.x<player_instances[0].env_max_x && req.y<player_instances[0].env_max_y && req.z<player_instances[0].env_max_z){
+    // ROS_INFO("[Player] Request for gas concentration at location [%.2f, %.2f, %.2f]m",req.x, req.y, req.z);    
+
+    // std::cout<<"0.1"<<std::endl;
     //Get all gas concentrations and gas types (from all instances)
+    // std::cout<<"sizes: "<<player_instances.size()<<", "<<srv_response_gas_types.size()<<", "<<srv_response_gas_concs.size()<<std::endl;
     for (int i=0;i<num_simulators; i++)
-        player_instances[i].get_gas_concentration(req.x, req.y, req.z, srv_response_gas_types[i], srv_response_gas_concs[i]);
+      player_instances[i].get_gas_concentration(req.x, req.y, req.z, srv_response_gas_types[i], srv_response_gas_concs[i]);
 
     //Return gas concentration for each gas_type.
     //If we have multiple instances with the same gas, then add their concentrations.
+    // std::cout<<"0.2"<<std::endl;
     std::map<std::string,double> mymap;
     for (int i=0;i<num_simulators; i++)
-    {
+      {
         if (mymap.find(srv_response_gas_types[i]) == mymap.end() )
-            mymap[srv_response_gas_types[i]] = srv_response_gas_concs[i];
+	  mymap[srv_response_gas_types[i]] = srv_response_gas_concs[i];
         else
-            mymap[srv_response_gas_types[i]] += srv_response_gas_concs[i];
-    }
-
+	  mymap[srv_response_gas_types[i]] += srv_response_gas_concs[i];
+      }
+    // std::cout<<"0.3"<<std::endl;
+    
     //Configure Response
     res.gas_conc.clear();
     res.gas_type.clear();
     for (std::map<std::string,double>::iterator it=mymap.begin(); it!=mymap.end(); ++it)
-    {
+      {
         res.gas_type.push_back(it->first);
         res.gas_conc.push_back(it->second);
-    }
+      }
+    // std::cout<<"0.4"<<std::endl;
 
-    return true;
+    // std::cout<<"gas conc: "<<res.gas_conc[0]<<std::endl;
+    // std::cout<<"gas type: "<<res.gas_type[0]<<std::endl;
+  }
+  // else{
+    
+  // }
+  // ROS_INFO("[Player] Response for gas concentration: %f, %s",res.gas_conc[0],res.gas_type[0]);
+
+  // ROS_INFO("pos: %f, %f, %f, min:  %f,%f,%f, max: %f,%f,%f", req.x, req.y, req.z, player_instances[0].env_min_x, player_instances[0].env_min_y, player_instances[0].env_min_z, player_instances[0].env_max_x,player_instances[0].env_max_y, player_instances[0].env_max_z);
+  
+  // std::cout<<"1"<<std::endl;
+  return true;
 }
 
 
-bool get_wind_value_srv(gaden_player::WindPosition::Request  &req, gaden_player::WindPosition::Response &res)
+bool get_wind_value_srv(gaden_player::WindPosition::Request  &req, gaden_player::WindPosition::Response &res)  
 {
+  ROS_INFO("[Player] Request for wind at location [%.2f, %.2f, %.2f]m",req.x, req.y, req.z);
     //Since the wind fields are identical among different instances, return just the information from instance[0]
     player_instances[0].get_wind_value(req.x, req.y, req.z, res.u, res.v, res.w);
     return true;
@@ -89,10 +113,10 @@ int main( int argc, char** argv )
     ros::Rate r(100); //Set max rate at 100Hz (for handling services - Top Speed!!)
     int iteration_counter = initial_iteration;
     while (ros::ok())
-    {        
-        if( (ros::Time::now() - time_last_loaded_file).toSec() >= 1/player_freq )
-        {
-            if (verbose)
+    {   
+        if( (ros::Time::now() - time_last_loaded_file).toSec() >= 1.0/player_freq )
+        {	  
+            if (verbose||true)
                 ROS_INFO("[Player] Playing simulation iteration %i", iteration_counter);
             //Read Gas and Wind data from log_files
             load_all_data_from_logfiles(iteration_counter); //On the first time, we configure gas type, source pos, etc.
@@ -101,10 +125,12 @@ int main( int argc, char** argv )
             time_last_loaded_file = ros::Time::now();
         }
 
+	// std::cout<<"4"<<std::endl;
         //Attend service request at max rate!
         //This allows sensors to have higher sampling rates than the simulation update
         ros::spinOnce();
         r.sleep();
+	// std::cout<<"5"<<std::endl;
     }
 }
 
@@ -356,13 +382,18 @@ void sim_obj::get_gas_concentration(float x, float y, float z, std::string &gas_
 {
     //Get cell idx from point location
     int xx,yy,zz;
-    xx = (int)ceil((x - env_min_x)/environment_cell_size);
-    yy = (int)ceil((y - env_min_y)/environment_cell_size);
-    zz = (int)ceil((z - env_min_z)/environment_cell_size);
+    xx = (int)ceil((x - env_min_x)/environment_cell_size)-1;
+    yy = (int)ceil((y - env_min_y)/environment_cell_size)-1;
+    zz = (int)ceil((z - env_min_z)/environment_cell_size)-1;
+
+    // std::cout<<"xx: "<<xx<<" yy: "<<yy<<" zz: "<<zz<<std::endl;
+    // std::cout<<gas_type<<std::endl;
 
     //Get gas concentration from that cell
     gas_conc = C[xx][yy][zz];
     gas_name = gas_type;
+    // std::cout<<"0.15"<<std::endl;
+    // std::cout<<"C[0][yy][zz]: "<<C[0][yy][zz]<<std::endl;
 }
 
 //Get Wind concentration at lcoation (x,y,z)
@@ -462,7 +493,8 @@ void sim_obj::get_concentration_as_markers(visualization_msgs::Marker &mkr_point
 
                 double gas_value = C[i][j][k]*1;
 
-                for (int N=0;N<(int)round(gas_value/2);N++)
+                // for (int N=0;N<(int)round(gas_value/2);N++)
+		for (int N=0;N<(int)round(gas_value/2.0);N++)
                 {
                     //Set point position (corner of the cell + random)
                     p.x = env_min_x + (i+0.5)*environment_cell_size + ((rand()%100)/100.0f)*environment_cell_size;
@@ -485,7 +517,7 @@ void sim_obj::get_concentration_as_markers(visualization_msgs::Marker &mkr_point
                     }
                     else if (!strcmp(gas_type.c_str(),"propanol"))
                     {
-                        color.r=0.8; color.g=0.8; color.b=0;
+		      color.r=0.8; color.g=0.8; color.b=0;
                     }
                     else if (!strcmp(gas_type.c_str(),"chlorine"))
                     {
@@ -516,6 +548,8 @@ void sim_obj::get_concentration_as_markers(visualization_msgs::Marker &mkr_point
                         ROS_INFO("[player] Setting Defatul Color");
                         color.r = 0.9; color.g = 0;color.b = 0;
                     }
+
+		    color.r=0.8; color.g=0.8; color.b=0;
 
                     //Add particle marker
                     mkr_points.points.push_back(p);

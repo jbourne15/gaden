@@ -41,22 +41,23 @@ clc;
 % This model only accounts for the inner volume (no walls neither obstacles)
 
 % refer to Cartesian BOX in SIMSCALE
-min_range = [-50 -50   0];    %m (x,y,z)
-max_range = [50 50 10];      %m (x,y,z)
+min_range = [0 0 0];    %m (x,y,z)
+max_range = [100 100 10];      %m (x,y,z)
 plot_data = true;
 z_layer_to_plot = 5;       %if plot_data=true, the cell_z to plot 2D slices
 
 % Generate a z_layer_for_occ3Dgrid with cube cells
 cell_resolution = 1;      %(m/cell) cell size of desired cube_cells
-folder_path = './';         %Path to the folder containing the CFD wind_flow simulations (for this demo is the current folder)
+%folder_path = './';         %Path to the folder containing the CFD wind_flow simulations (for this demo is the current folder)
+folder_path = '/media/jbourne/Dropbox/gaden/simscale_results/test_case_3/';         %Path to the folder containing the CFD wind_flow simulations (for this demo is the current folder)
 
-% min_range = [-5 -5.5 0];    %m (x,y,z)
-% max_range = [5 5.5 3];      %m (x,y,z)
+% min_range = [-50 -50   0];    %m (x,y,z)
+% max_range = [50 50 10];      %m (x,y,z)
 % plot_data = true;
-% z_layer_to_plot = 30;       %if plot_data=true, the cell_z to plot 2D slices
+% z_layer_to_plot = 5;       %if plot_data=true, the cell_z to plot 2D slices
 % 
-% % Generate a 3Dgrid with cube cells
-% cell_resolution = 0.1;      %(m/cell) cell size of desired cube_cells
+% % Generate a z_layer_for_occ3Dgrid with cube cells
+% cell_resolution = 1;      %(m/cell) cell size of desired cube_cells
 % folder_path = './';         %Path to the folder containing the CFD wind_flow simulations (for this demo is the current folder)
 
 %==========================================================================

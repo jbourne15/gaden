@@ -2,9 +2,10 @@
 
 <launch>
     <arg name="log" default="log" />
-    <arg name="sensorFrame" default="gps1"/>
+    <arg name="uavFrame" default="gps1"/>
     <arg name="topic_name" default="mps_data"/>
     <arg name="agent_number" default="1"/>
+    <arg name="respawn" default="true"/>
     
     ### NODE Simulated Gas Sensor ###
     #--------------------------------
@@ -12,14 +13,20 @@
     # MOX: TGS2620=0, TGS2600=1, TGS2611=2
     # PID: MiniRaeLite=30
     
-    <node pkg="simulated_gas_sensor" type="simulated_gas_sensor" name="pid" output="$(arg log)" respawn="true">
+    <node pkg="simulated_gas_sensor" type="simulated_gas_sensor" name="pid" output="$(arg log)" respawn="$(arg respawn)">
        <param name="/sensor_model" value="30"/>
-       <param name="/sensor_frame" value="$(arg sensorFrame)"/>
+       <param name="/sensor_frame" value="$(arg uavFrame)"/>
        <param name="/fixed_frame" value="world"/>
        <param name="topicName" value="$(arg topic_name)"/>
        <param name="AGENT_NUMBER" value="$(arg agent_number)"/>
-       <param name="xbeeRate" value="1.5"/>
+       <param name="xbeeRate" value="0.5"/>
        <param name="simXbee" value="true"/>
+       <param name="gaden" value="true"/>
+       
+       <!-- param name="source_position_x" value="25.0"/ -->           ### (m)
+       <!-- param name="source_position_y" value="25.0"/ -->           ### (m)
+       <!-- param name="source_position_z" value="2.5"/ -->            ### (m)
+
     </node>
     
 </launch>

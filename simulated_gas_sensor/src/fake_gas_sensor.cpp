@@ -11,6 +11,10 @@
 
 #include "fake_gas_sensor.h"
 
+enif_iuc::AgentMPS agentSensor_msg_mps;
+ros::Publisher agentSensor_read_pub_mps;
+void agentSensorCallback(const ros::TimerEvent& event);
+
 int main( int argc, char** argv )
 {
     ros::init(argc, argv, NODE_NAME);
@@ -26,8 +30,9 @@ int main( int argc, char** argv )
     //Publishers
     ros::Publisher sensor_read_pub = n.advertise<olfaction_msgs::gas_sensor>("Sensor_reading", 500);
     ros::Publisher sensor_read_pub_mps = n.advertise<mps_driver::MPS>(agentName+"/"+topicName, 1);
-    ros::Publisher agentSensor_read_pub_mps = n.advertise<enif_iuc::AgentMPS>("/agent_"+topicName, 1);
+    agentSensor_read_pub_mps = n.advertise<enif_iuc::AgentMPS>("/agent_"+topicName, 1);
     ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("Sensor_display", 100);
+    ros::Timer agentSensor_timer = n.createTimer(ros::Duration(XbeeRate), &agentSensorCallback);
 
     ros::Subscriber gps_sub = n.subscribe(agentName+"/mavros/global_position/global",1, &gpsCallback);
     ros::Subscriber local_sub = n.subscribe(agentName+"/gps_pose", 1, &localCallback); // from geodetic
@@ -86,7 +91,8 @@ int main( int argc, char** argv )
         }
         catch (tf::TransformException ex)
         {
-            ROS_ERROR("%s",ex.what());
+	  
+	  // ROS_ERROR("tf error: %s",ex.what());
             know_sensor_pose = false;
             ros::Duration(1.0).sleep();
         }
@@ -97,6 +103,8 @@ int main( int argc, char** argv )
             float x_pos = transform.getOrigin().x();
             float y_pos = transform.getOrigin().y();
             float z_pos = transform.getOrigin().z();
+
+	    // ROS_INFO("x: %f, y: %f, z: %f", x_pos, y_pos, z_pos);
 
             // Get Gas concentration at current position (of each gas present)
             // Service request to the simulator
@@ -118,7 +126,6 @@ int main( int argc, char** argv )
                 olfaction_msgs::gas_sensor sensor_msg;
 		
 		mps_driver::MPS sensor_msg_mps;
-		enif_iuc::AgentMPS agentSensor_msg_mps;
 		
                 sensor_msg.header.frame_id = input_sensor_frame;
                 sensor_msg.header.stamp = ros::Time::now();
@@ -212,10 +219,10 @@ int main( int argc, char** argv )
 		  agentSensor_msg_mps.mps=sensor_msg_mps;
 
 		  sensor_read_pub_mps.publish(sensor_msg_mps);	       
-		  if (ros::Time::now()-lastTime > ros::Duration(XbeeRate) && simXbee){
-		    agentSensor_read_pub_mps.publish(agentSensor_msg_mps);
-		    lastTime = ros::Time::now();
-		  }
+		  // if (ros::Time::now()-lastTime > ros::Duration(XbeeRate) && simXbee){
+		  //   agentSensor_read_pub_mps.publish(agentSensor_msg_mps);
+		  //   lastTime = ros::Time::now();
+		  // }
 		}
 
 		
@@ -228,9 +235,10 @@ int main( int argc, char** argv )
                     ROS_WARN("[fake_gas_sensor] Cannot read Gas Concentrations from simulator.");
                     notified = true;
                 }
+		
             }
 
-
+	    
             //Publish RVIZ sensor pose
             sensor.header.stamp = ros::Time::now();
             sensor.pose.position.x = x_pos;
@@ -379,6 +387,15 @@ float simulate_pid(gaden_player::GasPositionResponse GT_gas_concentrations)
             accumulated_conc += GT_gas_concentrations.gas_conc[i];
     }
     return accumulated_conc;
+}
+
+
+void agentSensorCallback(const ros::TimerEvent& event){
+
+  if (simXbee){
+    agentSensor_read_pub_mps.publish(agentSensor_msg_mps);
+  }
+  
 }
 
 
