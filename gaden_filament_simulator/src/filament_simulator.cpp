@@ -683,7 +683,7 @@ void CFilamentSimulator::update_filaments_location()
 
 				newpos_x = filaments[i].pose_x + generator();
 				newpos_y = filaments[i].pose_y + generator();
-				newpos_z = filaments[i].pose_z + generator();
+				newpos_z = filaments[i].pose_z + 0.25*generator();
 
 				//Check filament location
 				if (check_pose_with_environment(newpos_x, newpos_y, newpos_z ) == 0)
@@ -775,6 +775,7 @@ void CFilamentSimulator::save_state_to_file()
 	//Configure file name for saving the current snapshot
 	FILE *out;
 	std::string out_filemane = boost::str( boost::format("%s/FilamentSimulation_gasType_%i_sourcePosition_%.2f_%.2f_%.2f_iteration_%i") % results_location % gasType % gas_source_pos_x % gas_source_pos_y % gas_source_pos_z % last_saved_step);
+
 
 	//open file
 	//---------

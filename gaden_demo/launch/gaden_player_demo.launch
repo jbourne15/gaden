@@ -1,8 +1,9 @@
 <!-- DEMO mission file for GADEN PLAYER in a 3D environment-->
 
 <launch>
-    <arg name="FixedFrame" default="/map" />
+    <arg name="FixedFrame" default="world" />
     
+    <arg name="testCase" default="test_case_1_1" />
  
     ### NODE environment (for RVIZ visualization) ###
     <node pkg="gaden_environment" type="environment" name="environment" output="screen">	    
@@ -24,7 +25,7 @@
    	    
 	    # Plot CAD models
 	    <!-- param name="/occupancy3D_data" value="$(find gaden_demo)/demo/OccupancyGrid3D.csv" / -->
-	    <param name="/occupancy3D_data" value="/media/jbourne/Dropbox/gaden/simscale_results/test_case_3" />
+	    <param name="/occupancy3D_data" value="/media/jbourne/Dropbox/gaden/simscale_results/$(arg testCase)" />
 	    <param name="/number_of_CAD" value="5"/>
 	    <param name="/CAD_0" value="package://gaden_demo/demo/CADmodels/MAPIRlab_furniture_walls_cad_model.dae"/>
 	    <param name="/CAD_1" value="package://gaden_demo/demo/CADmodels/MAPIRlab_furniture_windows_cad_model.dae"/>
@@ -46,9 +47,9 @@
         # Data from the "filament_simulator" pkg
 	# Multiple sources can be set here							    
         <!-- param name="/simulation_data_0" value="$(find gaden_demo)/demo/logs_gas_dipersion_simulator/FilamentSimulation_gasType_0_sourcePosition_25.00_25.00_2.50_iteration_" / -->
-	< param name="/simulation_data_0" value="/media/jbourne/Dropbox/gaden/logs_gas_dipersion_simulator/test_case_1/FilamentSimulation_gasType_0_sourcePosition_50.00_50.00_2.50_iteration_" />
+	<!--param name="/simulation_data_0" value="/media/jbourne/Dropbox/gaden/logs_gas_dipersion_simulator/test_case_1/FilamentSimulation_gasType_0_sourcePosition_50.00_50.00_2.50_iteration_" / -->
 
-	<param name="/simulation_data_0" value="/media/jbourne/Dropbox/gaden/logs_gas_dipersion_simulator/test_case_3/FilamentSimulation_gasType_0_sourcePosition_42.00_50.00_2.50_iteration_" />
+	<param name="/simulation_data_0" value="/media/jbourne/Dropbox/gaden/logs_gas_dipersion_simulator/$(arg testCase)/FilamentSimulation_gasType_0_sourcePosition_50.00_50.00_2.50_iteration_" />
 
 
     </node>
@@ -62,11 +63,13 @@
     # SENSOR MODELS: 
     # MOX: TGS2620=0, TGS2600=1, TGS2611=2
     # PID: MiniRaeLite=30
-    <node pkg="tf" type="static_transform_publisher" name="mox0_broadcaster" args="3.0 2.5 0.4 0 0 0 map mox0_frame 100" />
-    <node pkg="tf" type="static_transform_publisher" name="mox1_broadcaster" args="3.0 2.5 0.4 0 0 0 map mox1_frame 100" />
-    <node pkg="tf" type="static_transform_publisher" name="mox2_broadcaster" args="3.0 2.5 0.4 0 0 0 map mox2_frame 100" />
-    
-    <node pkg="tf" type="static_transform_publisher" name="pid_broadcaster" args="42 48 2.0 0 0 0 map pid_frame 100" />
+    <node pkg="tf" type="static_transform_publisher" name="mox0_broadcaster" args="3.0 2.5 0.4 0 0 0 world mox0_frame 100" />
+    <node pkg="tf" type="static_transform_publisher" name="mox1_broadcaster" args="3.0 2.5 0.4 0 0 0 world mox1_frame 100" />
+    <node pkg="tf" type="static_transform_publisher" name="mox2_broadcaster" args="3.0 2.5 0.4 0 0 0 world mox2_frame 100" />
+
+    <node pkg="tf" type="static_transform_publisher" name="pid_broadcaster" args="50 48 2.0 0 0 0 world pid_frame 100" />
+
+
 
     <group ns="PID">
         <node pkg="simulated_gas_sensor" type="simulated_gas_sensor" name="fake_pid" output="screen">
@@ -74,14 +77,16 @@
 	        <param name="/sensor_frame" value="pid_frame" />
 	        <param name="/fixed_frame" value="$(arg FixedFrame)"/>	        
         </node>
-    </group>
+	</group>
+
+
 
     
 
     ### NODE Simulated Wind Sensor ###
     #---------------------------------
 
-    <node pkg="tf" type="static_transform_publisher" name="anemometer_broadcaster" args="3.0 2.5 0.4 0 0 0 map anemometer_frame 100" />   
+    <node pkg="tf" type="static_transform_publisher" name="anemometer_broadcaster" args="3.0 2.5 0.4 0 0 0 world anemometer_frame 100" />   
     <group ns="Anemometer01">
         <node pkg="simulated_anemometer" type="simulated_anemometer" name="fake_anemometer" output="screen">	        
 	        <param name="/sensor_frame" value="anemometer_frame" />
@@ -92,9 +97,9 @@
 
     ### RQT PLOT Sensors ###
     #-----------------------
-    <node pkg="rqt_plot" type="rqt_plot" name="rqt_plot1"  args="/Mox00/Sensor_reading/raw /Mox01/Sensor_reading/raw /Mox02/Sensor_reading/raw "/>
+    <!--node pkg="rqt_plot" type="rqt_plot" name="rqt_plot1"  args="/Mox00/Sensor_reading/raw /Mox01/Sensor_reading/raw /Mox02/Sensor_reading/raw "/-->
     <node pkg="rqt_plot" type="rqt_plot" name="rqt_plot2"  args="/PID/Sensor_reading/raw "/>
-    <node pkg="rqt_plot" type="rqt_plot" name="rqt_plot3"  args="/Anemometer01/WindSensor_reading "/>
+    <!-- node pkg="rqt_plot" type="rqt_plot" name="rqt_plot3"  args="/Anemometer01/WindSensor_reading "/-->
 
   
      

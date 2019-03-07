@@ -494,7 +494,7 @@ void sim_obj::get_concentration_as_markers(visualization_msgs::Marker &mkr_point
                 double gas_value = C[i][j][k]*1;
 
                 // for (int N=0;N<(int)round(gas_value/2);N++)
-		for (int N=0;N<(int)round(gas_value/2.0);N++)
+		for (int N=0;N<(int)round(gas_value*1.5);N++)
                 {
                     //Set point position (corner of the cell + random)
                     p.x = env_min_x + (i+0.5)*environment_cell_size + ((rand()%100)/100.0f)*environment_cell_size;
