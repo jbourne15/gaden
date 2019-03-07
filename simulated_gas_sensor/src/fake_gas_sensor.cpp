@@ -13,6 +13,7 @@
 
 enif_iuc::AgentMPS agentSensor_msg_mps;
 ros::Publisher agentSensor_read_pub_mps;
+geometry_msgs::TwistStamped vel;
 void agentSensorCallback(const ros::TimerEvent& event);
 
 int main( int argc, char** argv )
@@ -36,6 +37,8 @@ int main( int argc, char** argv )
 
     ros::Subscriber gps_sub = n.subscribe(agentName+"/mavros/global_position/global",1, &gpsCallback);
     ros::Subscriber local_sub = n.subscribe(agentName+"/gps_pose", 1, &localCallback); // from geodetic
+
+    ros::Subscriber vel_sub = n.subscribe(agentName+"/mavros/local_position/velocity", 1, &velCallback);
 	
     //Service to request gas concentration
     ros::ServiceClient client = n.serviceClient<gaden_player::GasPosition>("/odor_value");
@@ -214,11 +217,15 @@ int main( int argc, char** argv )
 		  sensor_msg_mps.local_y = xt[1];
 		  sensor_msg_mps.local_z = xt[2];
 
+		  sensor_msg_mps.vel_x = vel.twist.linear.x;
+		  sensor_msg_mps.vel_y = vel.twist.linear.y;
+		  sensor_msg_mps.vel_z = vel.twist.linear.z;
+
 		  //enif_iuc
 		  agentSensor_msg_mps.agent_number = AGENT_NUMBER;
-		  agentSensor_msg_mps.mps=sensor_msg_mps;
+		  agentSensor_msg_mps.mps=sensor_msg_mps;		  
 
-		  sensor_read_pub_mps.publish(sensor_msg_mps);	       
+		  sensor_read_pub_mps.publish(sensor_msg_mps);
 		  // if (ros::Time::now()-lastTime > ros::Duration(XbeeRate) && simXbee){
 		  //   agentSensor_read_pub_mps.publish(agentSensor_msg_mps);
 		  //   lastTime = ros::Time::now();
@@ -406,6 +413,12 @@ void localCallback(const geometry_msgs::PoseWithCovarianceStamped &msg){
   xt[2] = msg.pose.pose.position.z;
   //from ENU to local pose
 }
+
+
+void velCallback(const geometry_msgs::TwistStamped& msg){
+  vel = msg;
+}
+
 
 void gpsCallback(const sensor_msgs::NavSatFix &msg){  
   gps = msg;

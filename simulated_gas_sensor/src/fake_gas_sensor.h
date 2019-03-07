@@ -11,6 +11,7 @@
 //#include <dlib/matrix.h>
 #include "sensor_msgs/NavSatFix.h"
 #include "geometry_msgs/PoseWithCovarianceStamped.h"
+#include <geometry_msgs/PoseStamped.h>
 
 #include <cstdlib>
 #include <math.h>
@@ -80,7 +81,7 @@ float simulate_pid(gaden_player::GasPositionResponse GT_gas_concentrations);
 
 void localCallback(const geometry_msgs::PoseWithCovarianceStamped &msg);
 void gpsCallback(const sensor_msgs::NavSatFix &msg);
-
+void velCallback(const geometry_msgs::TwistStamped& msg);
 
 //------------------------ SENSOR CHARACTERIZATION PARAMS ----------------------------------//
 
